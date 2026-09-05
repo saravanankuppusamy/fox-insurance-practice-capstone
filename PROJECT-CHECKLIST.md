@@ -1,0 +1,19 @@
+# Completion Checklist
+- [ ] API starts and `/api/health` returns OK
+- [ ] Seed script creates users, customers, policies, service requests
+- [ ] Login returns JWT
+- [ ] Protected routes reject missing tokens
+- [ ] Customer CRUD works
+- [ ] Policy CRUD works
+- [ ] Service request CRUD, filters, notes work
+- [ ] Dashboard shows live totals
+- [ ] React login and protected navigation work
+- [ ] Docker Compose starts all services
+- [ ] Nginx proxies `/api`
+- [ ] HTTPS works with generated self-signed cert
+- [ ] Kind cluster runs application
+- [ ] PVC is Bound
+- [ ] API replicas become Ready
+- [ ] README is updated with screenshots/lessons learned
+- [ ] Review questions completed
+- [ ] 8-10 minute demo prepared

@@ -1,0 +1,9 @@
+import {Router} from 'express'; import {ServiceRequest} from '../models/ServiceRequest.js'; import {auth} from '../middleware/auth.js';
+const r=Router();r.use(auth);
+r.get('/stats',async(_req,res,next)=>{try{const byStatus=await ServiceRequest.aggregate([{$group:{_id:'$status',count:{$sum:1}}}]);res.json({total:await ServiceRequest.countDocuments(),byStatus});}catch(e){next(e)}});
+r.get('/',async(req,res,next)=>{try{const q:any={};for(const f of ['status','priority','category']) if(req.query[f])q[f]=req.query[f]; if(req.query.search)q.description={$regex:req.query.search,$options:'i'};res.json(await ServiceRequest.find(q).populate('customer','customerNumber firstName lastName').populate('policy','policyNumber type').populate('assignedTo','name email').sort({createdAt:-1}));}catch(e){next(e)}});
+r.post('/',async(req,res,next)=>{try{const n=1001+await ServiceRequest.countDocuments();res.status(201).json(await ServiceRequest.create({...req.body,requestNumber:`SR-${n}`,assignedTo:req.user!._id}));}catch(e){next(e)}});
+r.get('/:id',async(req,res,next)=>{try{res.json(await ServiceRequest.findById(req.params.id).populate('customer policy assignedTo notes.author','name email firstName lastName policyNumber'));}catch(e){next(e)}});
+r.put('/:id',async(req,res,next)=>{try{res.json(await ServiceRequest.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true}));}catch(e){next(e)}});
+r.post('/:id/notes',async(req,res,next)=>{try{if(!req.body.text?.trim())return res.status(400).json({message:'Note text is required'});const x=await ServiceRequest.findById(req.params.id);if(!x)return res.status(404).json({message:'Request not found'});x.notes.push({author:req.user!._id,text:req.body.text} as any);await x.save();res.status(201).json(x);}catch(e){next(e)}});
+r.delete('/:id',async(req,res,next)=>{try{await ServiceRequest.findByIdAndDelete(req.params.id);res.status(204).end();}catch(e){next(e)}});export default r;

@@ -1,0 +1,21 @@
+services:
+  mongo:
+    image: mongo:7
+    volumes: ["mongo-data:/data/db"]
+  api:
+    build: ./fox-api
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/fox-practice
+      JWT_SECRET: ${JWT_SECRET:-practice-prod-secret}
+      PORT: 4000
+      CLIENT_ORIGIN: https://localhost:8443
+    depends_on: [mongo]
+  client:
+    build: ./fox-client
+    ports: ["8080:80","8443:443"]
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./fox-client/nginx-ssl.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [api]
+volumes:
+  mongo-data:
